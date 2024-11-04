@@ -1,7 +1,9 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using System.Data;
 using System.Data.SQLite;
 using TestTSOUA.Models;
+using TestTSOUA.Repository;
 
 namespace TestTSOUA.Controllers
 {
@@ -9,36 +11,27 @@ namespace TestTSOUA.Controllers
     [ApiController]
     public class MainDataController : ControllerBase
     {
-        [HttpGet]
-        public IActionResult getMainData(string date)
+        private readonly IMainDataRepository _mainDataRepository;
+        private readonly IDbConnection _connection;
+        public MainDataController(IMainDataRepository mainDataRepository)
         {
-            var hoursList = new List<HoursModel>();
+            _mainDataRepository = mainDataRepository;
+        }
 
-            string connectionString = "Data Source=tasks_db.db;Version=3;";
-            using (SQLiteConnection connection = new SQLiteConnection(connectionString))
+        [HttpGet]
+        public IActionResult GetMainData(string date)
+        {
+            try
             {
-
-                connection.Open();
-
-                // Выполнение SELECT запроса
-                string selectSql = $"SELECT id_obj, date_start FROM hours where date_start like '{date}%'";
-                using (var command = new SQLiteCommand(selectSql, connection))
-                {
-                    using (var reader = command.ExecuteReader())
-                    {
-                        while (reader.Read())
-                        {
-                            var hours = new HoursModel
-                            {
-                                id_obj = reader.GetString(1), // Первый столбец (id)
-                                data_start = reader.GetString(1) // Второй столбец (name)
-                            };
-                            hoursList.Add(hours);
-                        }
-                    }
-                }
+                var hoursList = _mainDataRepository.GetDataHours(date).ToList();
                 return Ok(hoursList);
             }
+            catch (Exception ex)
+            {
+                return StatusCode(500, ex);
+            }
+           
+            
                 
         }
     }

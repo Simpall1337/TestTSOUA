@@ -1,3 +1,5 @@
+using TestTSOUA.Repository;
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
@@ -6,6 +8,21 @@ builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+
+builder.Services.AddScoped<IMainDataRepository, MainDataRepository>();
+
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowAll",
+        builder =>
+        {
+            builder.AllowAnyOrigin() 
+                   .AllowAnyMethod() 
+                   .AllowAnyHeader(); 
+        });
+});
+
+builder.Services.AddControllers();
 
 var app = builder.Build();
 
