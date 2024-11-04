@@ -1,0 +1,6 @@
+@TestTSOUA_HostAddress = http://localhost:5285
+
+GET {{TestTSOUA_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
