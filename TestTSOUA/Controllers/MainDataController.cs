@@ -8,7 +8,7 @@ using TestTSOUA.Repository;
 namespace TestTSOUA.Controllers
 {
     [Route("api/[controller]")]
-    [ApiController]
+    [ApiController] 
     public class MainDataController : ControllerBase
     {
         private readonly IMainDataRepository _mainDataRepository;
@@ -24,15 +24,46 @@ namespace TestTSOUA.Controllers
             try
             {
                 var hoursList = _mainDataRepository.GetDataHours(date).ToList();
-                return Ok(hoursList);
+                var objectsList = _mainDataRepository.GetObjectsHours(date).ToList();
+                var hoursAnalyzer = _mainDataRepository.GetHoursAnalyzerHours(date).ToList();
+
+                DateTimeSeparator.SplitDateTime(hoursList);
+
+                var obj = new
+                {
+                    hoursList,
+                    objectsList,
+                    hoursAnalyzer
+                };
+                return Ok(obj);
             }
             catch (Exception ex)
             {
                 return StatusCode(500, ex);
             }
            
-            
-                
+        }
+
+        public class DateTimeSeparator
+        {
+            public static void SplitDateTime(List<HoursModel> events)
+            {
+                foreach (var eventItem in events)
+                {
+                    if (DateTime.TryParseExact(eventItem.date_start, "d-M-yyyy H:mm:ss",
+                        System.Globalization.CultureInfo.InvariantCulture,
+                        System.Globalization.DateTimeStyles.None, out DateTime parsedDateTime))
+                    {
+                        
+                        eventItem.date_start = parsedDateTime.ToString("d-M-yyyy");
+                        eventItem.time_start = parsedDateTime.ToString("H:mm:ss");
+                    }
+                    else
+                    {
+                       throw new FormatException("Не вірний формат дати");
+                    }
+                }
+            }
         }
     }
 }
